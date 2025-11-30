@@ -11,6 +11,9 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 # THE JOBS: What actually happens?
 jobs:
   build-and-test:
@@ -40,24 +43,26 @@ jobs:
       # NEW: Upload the files so Job 2 can see them
       # In GitHub Actions, jobs run on different computers. 
       # Job 1 computer deletes data when done. We must "Upload" the good code to a shared storage (Artifacts)      
-      - name: Upload artifact for deployment
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: '.'
 
-  # JOB 2: DEPLOYMENT (Release)
+
   deploy-to-live:
-    # IMPORTANT: "needs" means this job waits for 'build-and-test' to finish successfully.
+
     needs: build-and-test
-    
-    # This creates a specific environment url in GitHub UI
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
     runs-on: ubuntu-latest
-    
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
+       uses: actions/deploy-pages@v1
