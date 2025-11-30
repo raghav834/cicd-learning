@@ -1,0 +1,23 @@
+name: My First Pipeline
+
+# THE TRIGGER: When does this run?
+on:
+  push:
+    branches: [ "main" ]
+
+# THE JOBS: What actually happens?
+jobs:
+  say-hello-job:
+    # The computer OS we want to use (like renting a laptop for 1 min)
+    runs-on: ubuntu-latest
+
+    # The steps the robot takes
+    steps:
+      - name: Check out my code
+        uses: actions/checkout@v3
+
+      - name: Run a one-line script
+        run: echo "Hello! The pipeline has started successfully."
+
+      - name: Verify files
+        run: ls -la
