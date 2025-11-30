@@ -49,9 +49,13 @@ jobs:
   deploy-to-live:
 
     needs: build-and-test
+
+    
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
