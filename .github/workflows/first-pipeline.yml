@@ -41,7 +41,7 @@ jobs:
       # In GitHub Actions, jobs run on different computers. 
       # Job 1 computer deletes data when done. We must "Upload" the good code to a shared storage (Artifacts)      
       - name: Upload artifact for deployment
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           path: '.'
 
