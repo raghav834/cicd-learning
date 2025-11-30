@@ -16,8 +16,18 @@ jobs:
       - name: Check out my code
         uses: actions/checkout@v3
 
-      - name: Run a one-line script
-        run: echo "Hello! The pipeline has started successfully."
+      # NEW STEP: Set up Node.js (to run testing tool)
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-      - name: Verify files
-        run: ls -la
+      # NEW STEP: Install the testing tool (HTMLHint)
+      - name: Install HTML Linter
+        run: npm install -g htmlhint
+
+      # NEW STEP: Run the test
+      # This command checks all html files. If it finds errors, the pipeline STOPS.
+      - name: Run HTML Test
+        run: htmlhint *.html
+
