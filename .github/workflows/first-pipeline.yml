@@ -3,7 +3,11 @@ name: My First Pipeline
 # THE TRIGGER: When does this run?
 on:
   push:
+<<<<<<< HEAD
     branches: [ "main" ]
+=======
+    branches: [ "master" ]
+>>>>>>> 7c58f1f (Added CI pipeline)
 
 # THE JOBS: What actually happens?
 jobs:
