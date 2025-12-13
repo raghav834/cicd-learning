@@ -17,6 +17,7 @@ concurrency:
 
 # THE JOBS: What actually happens?
 jobs:
+  # CI Integration (Testing)
   build-and-test:
     # The computer OS we want to use (like renting a laptop for 1 min)
     runs-on: ubuntu-latest
@@ -46,30 +47,35 @@ jobs:
       # Job 1 computer deletes data when done. We must "Upload" the good code to a shared storage (Artifacts)      
 
 
+      # CD Deploying(If tested then Deploy) 
   deploy-to-live:
 
     needs: build-and-test
-
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+          # 1. Log in to Docker Hub using the Secrets we created
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          # Upload entire repository
-          path: '.'
-            
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      
+    
+            # 2. Set up Docker Buildx (a tool to build images efficiently)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Build and Push
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # NAMING CONVENTION: username/repository:tag
+          # We use 'latest' as the tag for now.
+          tags: ${{ secrets.DOCKER_USERNAME }}/cicd-learning:latest
