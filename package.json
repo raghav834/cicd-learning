@@ -1,0 +1,23 @@
+{
+  "name": "lp1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raghav834/cicd-learning.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raghav834/cicd-learning/issues"
+  },
+  "homepage": "https://github.com/raghav834/cicd-learning#readme",
+  "devDependencies": {
+    "htmlhint": "^1.8.0"
+  }
+}
