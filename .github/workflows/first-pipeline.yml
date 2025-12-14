@@ -4,6 +4,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 # Permission to allow the robot to write to the website hosting
 permissions:
