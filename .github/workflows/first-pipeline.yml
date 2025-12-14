@@ -36,7 +36,7 @@ jobs:
 
 
       - name: Run HTML Test
-        run: htmlhint *.html
+        run: npx htmlhint *.html
 
       # --- THIS IS THE MISSING PART FOR WEBSITE ---
       # This step bundles your index.html into a special "artifact" (zip file)
