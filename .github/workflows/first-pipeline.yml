@@ -4,6 +4,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 # Permission to allow the robot to write to the website hosting
 permissions:
@@ -51,7 +53,11 @@ jobs:
   deploy-to-live:
 
     needs: build-and-test
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
     runs-on: ubuntu-latest
+
 
     steps:
       - name: Checkout
