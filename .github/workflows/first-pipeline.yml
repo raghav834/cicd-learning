@@ -1,13 +1,11 @@
 name: CI/CD Pipeline
 
-# THE TRIGGER: When does this run?
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
-# Permission to allow the robot to write to the website hosting
 permissions:
   contents: read
   pages: write
@@ -17,71 +15,81 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-# THE JOBS: What actually happens?
 jobs:
-  # CI Integration (Testing)
+  # ---------------------------------------------------
+  # JOB 1: CHECK CODE & PREPARE FILES
+  # ---------------------------------------------------
   build-and-test:
-    # The computer OS we want to use (like renting a laptop for 1 min)
     runs-on: ubuntu-latest
-
-    # The steps the robot takes
     steps:
       - name: Check out my code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Updated to v4
 
-      # NEW STEP: Set up Node.js (to run testing tool)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # NEW STEP: Install the testing tool (HTMLHint)
       - name: Install HTML Linter
         run: npm install -g htmlhint
 
-      # NEW STEP: Run the test
-      # This command checks all html files. If it finds errors, the pipeline STOPS.
       - name: Run HTML Test
         run: htmlhint *.html
 
-      # NEW: Upload the files so Job 2 can see them
-      # In GitHub Actions, jobs run on different computers. 
-      # Job 1 computer deletes data when done. We must "Upload" the good code to a shared storage (Artifacts)      
+      # --- THIS IS THE MISSING PART FOR WEBSITE ---
+      # This step bundles your index.html into a special "artifact" (zip file)
+      # If you don't do this, the Deploy job has nothing to deploy!
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-
-      # CD Deploying(If tested then Deploy) 
-  deploy-to-live:
-
+  # ---------------------------------------------------
+  # JOB 2: DOCKER OPERATIONS (The Supply Chain)
+  # ---------------------------------------------------
+  docker-push:
     needs: build-and-test
-
+    # Only run on Master (not PRs)
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-
     runs-on: ubuntu-latest
-
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-          # 1. Log in to Docker Hub using the Secrets we created
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      
-    
-            # 2. Set up Docker Buildx (a tool to build images efficiently)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3. Build and Push
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # NAMING CONVENTION: username/repository:tag
-          # We use 'latest' as the tag for now.
           tags: ${{ secrets.DOCKER_USERNAME }}/cicd-learning:latest
+
+  # ---------------------------------------------------
+  # JOB 3: DEPLOY WEBSITE (The Release)
+  # ---------------------------------------------------
+  deploy-to-pages:
+    needs: build-and-test
+    # Only run on Master (not PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    # This creates the "View Deployment" button in GitHub
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v5 # Checks if GitHub Pages is enabled
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # Takes the artifact from Job 1 and puts it on the internet
